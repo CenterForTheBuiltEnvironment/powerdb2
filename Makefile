@@ -29,7 +29,7 @@ dist/$(PROJECT)-$(VERSION).tar.gz:
 
 builddeb: 
 	cd dist && tar zxvf $(PROJECT)-$(VERSION).orig.tar.gz
-	cd dist/$(PROJECT)-$(VERSION) && dpkg-buildpackage -rfakeroot -uc -us -F
+	cd dist/$(PROJECT)-$(VERSION) && dpkg-buildpackage -rfakeroot -uc -us -S
 
 
 min:
