@@ -15,7 +15,7 @@ install:
 	mkdir -p $(DESTDIR)/$(INSTALL_DIR)
 	cp -r $(INSTALL_DIRS) $(DIST_FILES) $(DESTDIR)/$(INSTALL_DIR)
 	mkdir -p $(DESTDIR)/etc/apache2/sites-available
-	cp conf/powerdb2 $(DESTDIR)/etc/apache2/sites-available
+	cp conf/powerdb2.conf $(DESTDIR)/etc/apache2/sites-available
 
 dist: min dist/$(PROJECT)-$(VERSION).tar.gz
 
