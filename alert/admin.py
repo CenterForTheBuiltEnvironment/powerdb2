@@ -31,8 +31,8 @@ from django.contrib import admin
 from django.forms.models import inlineformset_factory
 from django.contrib.contenttypes import generic
 
-from powerdb2.alert.models import *
-from powerdb2.alert.forms import *
+from alert.models import *
+from alert.forms import *
 
 class ActionAdmin(admin.ModelAdmin):
     pass

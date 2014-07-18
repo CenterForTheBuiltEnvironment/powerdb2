@@ -30,7 +30,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import re
 
-from powerdb2.alert.models import *
+from alert.models import *
 from smap.archiver.client import SmapClient
 from smap.util import buildkv
 

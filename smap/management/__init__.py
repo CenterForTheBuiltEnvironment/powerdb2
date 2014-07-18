@@ -4,7 +4,7 @@ import sys
 
 from django.db.models.signals import post_syncdb
 from django.db import connection, transaction, utils
-import powerdb2.smap.models
+import smap.models
 
 EXTRA_SQL = ['sql/insert-stream.psql',
              'sql/set-metadata-default.psql']
@@ -28,4 +28,4 @@ def install_extras(sender, **kwargs):
         else:
             transaction.commit()
 
-post_syncdb.connect(install_extras, sender=powerdb2.smap.models)
+post_syncdb.connect(install_extras, sender=smap.models)

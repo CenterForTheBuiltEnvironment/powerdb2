@@ -17,29 +17,29 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
 
-    (r'^plot/', include('powerdb2.smap.urls')),
+    (r'^plot/', include('smap.urls')),
 
-    (r'^status/', include('powerdb2.status.urls')),
+    (r'^status/', include('status.urls')),
 
-    (r'^backend/', include('powerdb2.backend.urls')),
+    (r'^backend/', include('backend.urls')),
 
-    (r'^backend_auth/', include('powerdb2.backend.urls')),
+    (r'^backend_auth/', include('backend.urls')),
 
                        # (r'^api/', include('powerdb2.api.urls')),
 
 #    (r'^datacenter/', include('powerdb2.datacenter.urls')),
 
-    (r'^robots.txt.*', 'powerdb2.views.robots'),
+    (r'^robots.txt.*', 'views.robots'),
 
-    (r'^alert/', include('powerdb2.alert.urls')),
+    (r'^alert/', include('alert.urls')),
 
-    (r'^$', 'powerdb2.views.root'),
+    (r'^$', 'views.root'),
      
-    (r'^status/', include('powerdb2.status.urls')),
+    (r'^status/', include('status.urls')),
     
-    (r'^dashboard/', 'powerdb2.status.views.dashboard'),
+    (r'^dashboard/', 'status.views.dashboard'),
 
-    (r'^smap_query/', 'powerdb2.status.views.smap_query')
+    (r'^smap_query/', 'status.views.smap_query')
 )
 
 urlpatterns += staticfiles_urlpatterns()

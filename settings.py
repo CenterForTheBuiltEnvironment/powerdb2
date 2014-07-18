@@ -12,7 +12,8 @@ try:
     PROJECT_ROOT
 except NameError:
     PROJECT_ROOT = os.path.dirname(__file__)
-    sys.path = [os.path.join(PROJECT_ROOT, 'lib')] + sys.path
+    sys.path = [os.path.join(PROJECT_ROOT, 'lib'), PROJECT_ROOT] + sys.path
+print sys.path
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -108,7 +109,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_NETLOC = 'localhost'
-ROOT_URLCONF = 'powerdb2.urls'
+ROOT_URLCONF = 'urls'
 
 # where static files will be copied by "collectstatic"
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static/')
@@ -123,8 +124,8 @@ STATICFILES_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'powerdb2.smap',
-    'powerdb2.alert',
+    'smap',
+    'alert',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

@@ -43,7 +43,7 @@ try:
 except NameError:
     no_twisted = True
 
-from powerdb2 import settings
+import settings
 from smap.archiver.client import SmapClient
 
 import emaillib

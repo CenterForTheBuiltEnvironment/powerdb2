@@ -38,7 +38,7 @@ from smap import driver, actuate
 from smap.archiver.client import RepublishClient, SmapClient
 from smap.contrib.client import StringConsumer
 
-from powerdb2.alert import models
+from alert import models
 
 def get_testfn(cmpfn, thresh):
     def testfn(val):

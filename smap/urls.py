@@ -30,8 +30,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 from django.conf.urls import *
 
 urlpatterns = patterns('',
-    (r'^now$', 'powerdb2.smap.views.current_datetime'),
-    (r'^$', 'powerdb2.smap.views.plot'),
-    (r'^(?P<tree>[a-z0-9]+)$', 'powerdb2.smap.views.plot'),
-    (r'contextmenu.js', 'powerdb2.smap.views.menu'),
+    (r'^now$', 'smap.views.current_datetime'),
+    (r'^$', 'smap.views.plot'),
+    (r'^(?P<tree>[a-z0-9]+)$', 'smap.views.plot'),
+    (r'contextmenu.js', 'smap.views.menu'),
 )

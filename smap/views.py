@@ -55,7 +55,7 @@ except ImportError:
     from ordereddict import OrderedDict
 
 from models import *
-import powerdb2.settings as settings
+import settings
 import errors
 import profileheader
 

@@ -30,7 +30,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 from django.forms import ModelForm
 from django.core.validators import validate_email
 
-from powerdb2.alert.models import *
+from alert.models import *
 
 class RecipientsForm(ModelForm):
     class Meta:
