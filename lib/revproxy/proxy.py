@@ -151,7 +151,7 @@ def proxy_request(request, destination=None, prefix=None, headers=None,
 
     try:
         resp = restkit.request(proxied_url, method=method,
-                body=request.raw_post_data, headers=headers,
+                body=request.body, headers=headers,
                 follow_redirect=True,
                 decompress=decompress,
                 conn_manager=get_conn_manager())
@@ -215,7 +215,7 @@ class RevProxy(object):
         return self._proxied_urls
 
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, url, include
+        from django.conf.urls import patterns, url, include
         urlpatterns = patterns('')
         proxied_urls = self.get_proxied_urls()
         for prefix, target in proxied_urls.items():

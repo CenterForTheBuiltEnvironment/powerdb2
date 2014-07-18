@@ -1,5 +1,5 @@
 
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from piston.resource import Resource
 from powerdb2.api.handlers import SubscriptionHandler
 
