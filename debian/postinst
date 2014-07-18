@@ -40,6 +40,13 @@ EOF
     # install the database tables
     python manage.py syncdb
 
+    # start site using apache
+    a2dissite 000-default
+    a2ensite powerdb2
+    service apache2 reload
+    service apache2 restart
+
+
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
