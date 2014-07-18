@@ -25,6 +25,7 @@ function intersect_json(o){
 
 function genStreamTable(data){
   var html, row = '';
+  data = eval(data);
   data.forEach(function(d){
     try{
       var _date = new Date(d.Readings[0][0]);

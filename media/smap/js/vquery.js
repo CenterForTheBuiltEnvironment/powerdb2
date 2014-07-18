@@ -133,6 +133,7 @@ function VQuery(url, callback){
     $.ajax({
       url: url,
       type: "post",
+      dataType: "json",
       data: query,
       success: function(data){
         callback(data);

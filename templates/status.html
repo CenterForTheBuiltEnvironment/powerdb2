@@ -124,6 +124,7 @@
         $.ajax({
           url: url,
           type: "post",
+          dataType: "json",
           data: query,
           success: function(res){
             var m = res[0]
