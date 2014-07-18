@@ -1,7 +1,7 @@
 
 from django.conf.urls import *
 from piston.resource import Resource
-from powerdb2.api.handlers import SubscriptionHandler
+from api.handlers import SubscriptionHandler
 
 subscription_handler = Resource(SubscriptionHandler)
 

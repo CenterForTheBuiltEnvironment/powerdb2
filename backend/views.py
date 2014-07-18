@@ -1,8 +1,8 @@
 
 import urllib
 from django.db.models import Q
-import powerdb2.settings as settings
-import powerdb2.smap.models as models
+import settings
+import smap.models as models
 import revproxy
 import operator
 

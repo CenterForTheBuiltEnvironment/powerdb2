@@ -4,8 +4,8 @@ import json
 from piston.handler import BaseHandler
 
 from django.contrib.auth.models import User
-from powerdb2.smap.models import Subscription
-import powerdb2.settings as settings
+from smap.models import Subscription
+import settings
 
 class SubscriptionHandler(BaseHandler):
     allowed_methods = ('GET',)
