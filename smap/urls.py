@@ -28,6 +28,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from django.conf.urls import *
+from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
     (r'^now$', 'smap.views.current_datetime'),

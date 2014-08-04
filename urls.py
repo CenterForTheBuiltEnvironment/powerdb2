@@ -1,6 +1,7 @@
 from django.conf.urls import *
 from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf.urls.defaults import *
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -39,7 +40,11 @@ urlpatterns = patterns('',
     
     (r'^dashboard/', 'status.views.dashboard'),
 
-    (r'^smap_query/', 'status.views.smap_query')
+    (r'^smap_query/', 'status.views.smap_query'),
+
+    (r'^search/', include('search.urls')),
+
+
 )
 
 urlpatterns += staticfiles_urlpatterns()
