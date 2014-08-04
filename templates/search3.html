@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sMAP Stream Status</title>
+    <link href="/media/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/media/smap/css/vquery.css" rel="stylesheet" media="screen">
+    <link href="/media/smap/css/status.css" rel="stylesheet" media="screen">
+    <link href="/media/smap/css/statchart.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" type="text/css" href="//ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-migrate/1.1.1/jquery-migrate.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.0.1/d3.v3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/datatables/1.9.4/jquery.dataTables.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+    <script src="/media/smap/js/searchVQuery.js"></script>
+    
+
+    <script src="/media/smap/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/media/smap/js/miuri.js"></script>
+    <script src="/media/smap/js/smaputil.js"></script>
+
+
+  </head>
+
+  <body>
+
+    <div class="main">
+      <div class="left">
+        <div id="vquery"></div>
+        <div id='stream-div' style="height: 90%; overflow: auto; margin-top:10px;"></div>
+	<div id="loadmore" style="margin-top:20px;"></div> 
+      </div> 
+
+      <div class="right">
+        <div id="statchart" style="margin-bottom:10px;"></div>
+        <pre id="metadata" style="overflow: auto;"></pre>
+	<div id="labels" style="margin-top:20px;"></div>
+	<div id="query" style="overflow: auto;"></div>
+      </div>
+    </div>
+
+    <script>
+      var enum_id = 1;
+      var url = "/backend/api/query";
+
+      function genStreamTable(data){
+        var html, row = '';
+	//console.log(data);
+	//data = Array.prototype.slice.call(data);
+
+	console.log('Testing console');
+        data.forEach(function(d){
+          try{
+            var _date = new Date(d.Readings[0][0]);
+            var _reading = d.Readings[0][1].toFixed(2);
+          }catch(err){}
+          row = "<tr class='stream-row' data-uuid='" + d.uuid + "'>";
+	  //row +="<td class ='srch_sim' data-uuid='" + d.uuid + "' > <button id='search-similar' style='float:right;' class='btn'> \
+        //  	<i class='icon-search'></i>  Similar\
+       // 	</button> </td>"
+	  row +="<td class ='srch_replace' data-uuid='" + d.uuid + "' > <button id='replace' style='float:right;' class='btn'> \
+          	<i></i>  - \
+        	</button> </td>"
+
+          row += "<td class='path'> <a href='http://new.openbms.org/plot/?streamids=" + d.uuid + "' target='_blank'>" + d.Path + "</a> </td>";
+          //row += "<td class='path'>" + d.Path + "</td>";
+          //row += "<td class='reading'>" + _reading + "</td>";
+          //row += "<td class='timestamp'>" + _date + "</td>";
+
+          row += "</tr>";
+          html += row; 
+        });
+        return html;
+      }
+
+      function convertJSON(data){
+        var json = []
+        for (i in data){
+          var el = data[i];
+          json.push({"timestamp": el[0], "reading": el[1]});
+        }
+        return json;
+      }
+
+      function renderStreamChart(data){
+        var data_json = convertJSON(data.Readings);
+
+        var margin = {top: 20, right: 20, bottom: 20, left: 50},
+            width = 560 - margin.left - margin.right,
+            height = 300 - margin.top - margin.bottom;
+
+        var x = d3.time.scale()
+            .range([0, width]);
+
+        var y = d3.scale.linear()
+            .range([height, 0]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+        var line = d3.svg.line()
+            .x(function(d) { return x(d.timestamp); })
+            .y(function(d) { return y(d.reading); });
+
+        var svg = d3.select("#statchart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+         
+         x.domain(d3.extent(data_json, function(d) { return d.timestamp; }));
+         y.domain(d3.extent(data_json, function(d) { return d.reading; }));
+
+         svg.append("g")
+             .attr("class", "x axis")
+             .attr("transform", "translate(0," + height + ")")
+             .call(xAxis);
+           
+         svg.append("g")
+             .attr("class", "y axis")
+             .call(yAxis)
+           .append("text")
+             .attr("class", "unit-text")
+             .attr("transform", "rotate(-90)") 
+             .attr("y", 6)
+             .attr("dy", ".71em")
+             .style("text-anchor", "end")
+             
+         svg.append("path")
+             .datum(data_json)
+             .attr("class","line")
+             .attr("d", line);          
+      }
+      
+      function renderStreamMetadata(uuid){
+        var query = uuid;
+        $.ajax({
+          url: "/search/getMetadata/",
+          type: "post",
+          data: query,
+          success: function(res){
+	    res = JSON.parse(res); 
+	    console.log("Returned data : " + res);
+             var m = res[0];
+	     console.log("res[0] : " + m);
+            $('#metadata').empty();
+            if (!$.isEmptyObject(m)) {
+              m = JSON.stringify(m, null, 4);
+	      m = m.replace(/,/g,",\n");
+              $('#metadata').html(m);
+            }
+          }
+        });
+      }
+  
+        _streams = [];
+      function getStreamData(uuid){
+        var query = "select data before now limit 1000 where uuid='" + uuid + "'";
+
+        renderStreamMetadata(uuid);
+        $.ajax({
+          url: url,
+          type: "post",
+          data: query,
+          success: function(data){
+            var d = data[0];
+            var readings = d.Readings;
+            var uuid = d.uuid
+            var last = readings.pop();
+            $('#statchart').empty();
+            renderStreamChart(d);
+          }
+        });
+      }
+     
+      function renderSearchResults(data){
+	data = JSON.parse(data);
+	var len = data.length;
+	console.log("Returned data : " + data); 
+        var html = genStreamTable(data);
+        var viewportHeight = $(window).height();
+        var vqueryHeight = $('#vquery').outerHeight();
+	
+        $('#stream-div').height(viewportHeight-vqueryHeight-20);
+        $('#datatable').remove();
+        $('#stream-div').append(' \
+          <table id="datatable" class="table table-compact table-bordered"> \
+            <thead> \
+              <tr> \
+		<th> </th> \
+  		<th>Path</th> \
+              </tr> \
+            </thead> \
+          <tbody id="streams"></tbody> \
+          </table>');
+        $('#streams').html(html);
+        var dtable = $('#datatable').dataTable({
+          "bProcessing": true,
+          "bFilter": false,
+          "bPaginate": false
+        });
+        $('#datatable_info').remove();
+	createLoadMoreButton();
+        $('.stream-row').mouseover(function(){
+            console.log(" MOUSEOVER function for " + $(this).data("uuid"));
+          var uuid = $(this).data("uuid");
+          getStreamData(uuid);
+	  createAdditionBox(uuid);
+        });
+
+
+      
+      var uuids = _.pluck(_streams, 'uuid')
+      _.each(uuids, function(u){
+        $('td[data-uuid*='+u+']').toggleClass("selected")
+      });
+
+      $('.stream-row').click(function(){
+        $(this).toggleClass("selected");
+        console.log(" SELECTED function for " + $(this).data("uuid"));     
+        var uuid = $(this).data("uuid")
+        var stream_uuids = _.pluck(_streams, 'uuid')
+        if ($.inArray(uuid, stream_uuids) != -1) {
+          var i = stream_uuids.indexOf(uuid)
+          _streams.splice(i, 1)
+        } else {
+          var path = $(this)[0].cells[1].innerHTML
+          _streams.push({'path':path, 'uuid':uuid})
+        }
+        var paths = _.pluck(_streams, 'path')
+        var uuids = _.pluck(_streams, 'uuid')
+        
+
+      });
+
+	$('.srch_sim').click(function(){
+           var uuid = $(this).data("uuid");
+	   //alert("UUID = " + uuid);
+        $.ajax({
+          url: "/search/getSimilar/",
+          type: "post",
+          data: uuid,
+          success: function(res){
+	    //res = JSON.parse(res);
+	    
+	    console.log("Returned data : " + res);
+		renderSearchResults(res);
+        }
+	});
+
+	});
+	$('.srch_replace').click(function(){
+           var uuid = $(this).data("uuid");
+		var tr = $(this).parent();
+		tr.remove();
+	
+	   //alert("UUID = " + uuid);
+        $.ajax({
+          url: "/search/replace/",
+          type: "post",
+          data: uuid,
+          success: function(res){
+	    console.log("Removed search result");
+	   /*
+	    res = JSON.parse(res);
+	    res = res[0]; 
+	    console.log("Returned data : " + res);
+	    var row = "";
+          row = "<tr class='stream-row' data-uuid='" + res.uuid + "'>";
+	  //row +="<td class ='srch_sim' data-uuid='" + res.uuid + "' > <button id='search-similar' style='float:right;' class='btn'> \
+      //    	<i class='icon-search'></i>  Similar\
+      //  	</button> </td>"
+	  row +="<td class ='srch_replace' data-uuid='" + res.uuid + "' > <button id='replace' style='float:right;' class='btn'> \
+          	<i></i>  Replace\
+        	</button> </td>"
+
+          row += "<td class='path'>" + res.Path + "</td>";
+	  tr.replaceWith(row);
+	  // renderSearchResults(res);
+        */
+	}
+	});
+	
+
+	});
+
+      }
+   
+      function getMoreResults(data) {
+	      allResults = JSON.parse(data);
+	      console.log(" GOT THE REMAINING DATA");
+	} 
+ 
+	      //var allResults = $(); 
+      var vqCallback = renderSearchResults;
+      new VQuery(url, vqCallback,getMoreResults);
+
+
+
+    function displayMoreResults(allResults) {
+
+		allResults = JSON.parse(allResults);
+		var existing_html = $('#streams').html();
+		var html,row = '';
+		//console.log(data);
+		//data = Array.prototype.slice.call(data);
+
+		console.log('Testing console');
+		allResults.forEach(function(d){
+		  row = "<tr class='stream-row' data-uuid='" + d.uuid + "'>";
+		  row +="<td class ='srch_sim' data-uuid='" + d.uuid + "' > <button id='search-similar' style='float:right;' class='btn'> \
+			<i class='icon-search'></i>  Similar\
+			</button> </td>"
+		  row +="<td class ='srch_replace' data-uuid='" + d.uuid + "' > <button id='replace' style='float:right;' class='btn'> \
+			<i></i>  Replace\
+			</button> </td>"
+
+		  row += "<td class='path'> <a href='http://new.openbms.org/plot/?streamids=" + d.uuid + "' target='_blank'>" + d.Path + "</a> </td>";
+		  //row += "<td class='reading'>" + _reading + "</td>";
+		  //row += "<td class='timestamp'>" + _date + "</td>";
+
+		  row += "</tr>";
+		  html += row; 
+		});
+		$('#streams').html(existing_html + html);
+		 
+	}
+
+    function createLoadMoreButton() {
+	$('#loadmore').html(' \
+	      <div id="search-options-row"> \
+        <button id="load-more" style="float:right;" class="btn"> \
+          <i></i> Load More Results \
+        </button> \
+        <button id="gen-query" style="float:right;" class="btn"> \
+          <i></i>  Generate Query \
+        </button> \
+        <button id="plot-selected" style="float:right;" class="btn"> \
+          <i></i>  Plot \
+        </button> \
+      </div> \
+      <br style="clear:both;">\
+	');
+
+	$('#gen-query').click(function(){
+		console.log(" GEN-QUERY was clicked");
+		$.ajax({
+		  url: "/search/genQuery/",
+		  type: "post",
+		  data: "",
+		  success: function(res){
+			$('#query').html(' \
+      <div id="query-text"> \
+          <textarea rows="4" cols="150"> ' +  res + '</textarea> \
+      </div> ');
+
+
+
+		//	alert(res);
+		}
+		});
+   	 
+	});
+
+	$('#load-more').click(function(){
+
+		console.log(" LOAD MORE was clicked");
+		$.ajax({
+		  url: "/search/getNextSearchResults/",
+		  type: "post",
+		  data: "",
+		  success: function(res){
+			//displayMoreResults(res);
+			renderSearchResults(res);
+		}
+		});
+   	 
+	});
+
+
+
+	$('#plot-selected').click(function(){
+
+		console.log(" PLOT SELECTED was clicked");
+        console.log( _streams );
+   	    var uuids = _.pluck( _streams, 'uuid');
+        console.log( uuids );
+        var plotStreams = "";
+        for (var i= 0, l = uuids.length; i < l ; i++ ) {
+        plotStreams = plotStreams + "," + uuids[ i ];
+        }
+
+        plotStreams = plotStreams.substring(1, plotStreams.length); 
+
+        console.log(plotStreams);
+        window.open("http://new.openbms.org/plot/?streamids=" + plotStreams);
+	});
+
+
+
+	}		
+
+
+     
+
+    function createAdditionBox(uuid) {
+  $('#labels').html(' \
+      <div id="label-constraints"> \
+        <div id="label-constraint-cont-0" class="label-constraint-row"> \
+          <input id="label-constraint-tag-0" class="label-constraint-tag typeahead" type="text"> \
+          <button id="label-constraint-op-0" class="label-constraint-op-btn btn">=</button> \
+          <input id="label-constraint-val-0" class="label-constraint-val typeahead" type="text"> \
+        </div> \
+      </div> \
+      \
+      <div id="label-search-row"> \
+        <button id="label-search" style="float:right;" data-loading-text="Committing...." class="btn"> \
+          <i></i> Commit \
+        </button> \
+        <button id="label-add-constraint" style="float:right;" class="btn"> \
+          <i class="icon-plus"></i>  Add Key-Value Pairs\
+        </button> \
+      </div> \
+      <br style="clear:both;">\
+  ');
+ 
+  $('#label-add-constraint').click(function(){
+    var constr_row = '';
+    var cont_id = 'label-constraint-cont-' + enum_id;
+    var tag_id = 'label-constraint-tag-' + enum_id;
+    var op_id = 'label-constraint-op-' + enum_id;
+    var and_or_id = 'label-constraint-and-or-' + enum_id;
+    var val_id = 'label-constraint-val-' + enum_id;
+    var rem_id = 'label-remove-' + enum_id;
+    constr_row += "<div id='" + cont_id + "' class='label-constraint-row'>\n"
+    constr_row += "<input id='" + tag_id + "' class='label-constraint-tag typeahead' type='text'>\n"
+    constr_row += "<button id='" + op_id + "' class='label-constraint-op-btn btn'>=</button>\n"
+    constr_row += "<input id='" + val_id + "' class='label-constraint-val typeahead' type='text'>\n"
+    constr_row += "<button id='" + rem_id + "' class='label-remove-btn btn'><i class='icon-minus'></i></button>\n"
+    constr_row += "</div>\n"
+    $('#label-constraints').append(constr_row);
+
+    $('#'+rem_id).click(function(){
+      $('#'+cont_id).remove()
+    });
+
+    //var tag_query = "select distinct " + that.genConstraint(true);
+    //that.initConstraint(enum_id);
+    enum_id += 1;
+  });
+    
+  $('#label-search').click(function(){
+// var query = "select * " + that.genConstraint(false);
+// hack to get metadata, uuid, readings in one query
+    //var query = "apply null to data before now limit 1 " + that.genConstraint(false);
+
+    function getTags(){
+    var first = true;
+    var tags = [];
+    var vals = [];
+    var ops = [];
+      
+    var constraint = uuid + " " ;
+    $('.label-constraint-tag').each(function(){
+      tags.push($(this).val());
+    });
+
+    $('.label-constraint-val').each(function(){
+      vals.push($(this).val());
+    });
+
+    _.zip(tags, vals).forEach(function(d){
+      constraint += d[0] + ":" +  d[1] + " ";
+    });
+     return constraint;
+  };
+
+	var keys = getTags();
+     console.log("Got key-values" + keys );
+    $(this).button('loading');
+    $.ajax({
+      url: "/search/updateMetadata/",
+      type: "post",
+      data: keys,
+      success: function(data){
+        $('#label-search').button('reset');
+      },
+      failure:  function(){ console.log("query failure"); }
+    });
+  });
+
+ 
+      
+ 
+	}
+
+     
+    </script>
+  </body>
+</html>
+
