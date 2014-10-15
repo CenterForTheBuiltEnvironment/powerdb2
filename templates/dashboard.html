@@ -1,9 +1,14 @@
+smap@verde(pts0):/data/deploy/powerdb2$ su
+Password: 
+root@verde:/data/deploy/powerdb2# vi templates/dashboard.html 
+root@verde:/data/deploy/powerdb2# vi templates/dashboard.html 
+
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <title>sMAP Dashboard</title>
     <link href="/media/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="/media/smap/css/vquery.css" rel="stylesheet" media="screen">
@@ -17,7 +22,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.0.1/d3.v3.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/datatables/1.9.4/jquery.dataTables.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-    
+
     <script src="/media/smap/js/vquery.js"></script>
     <script src="/media/smap/js/bootstrap-datetimepicker.min.js"></script>
     <script src="/media/smap/js/miuri.js"></script>
@@ -26,7 +31,7 @@
     <style>
       #dashboard {
         font: 12px sans-serif;
-      }     
+      }
       .axis path,
       .axis line {
         fill: none;
@@ -47,9 +52,9 @@
         left:       0;
         height:     100%;
         width:      100%;
-        background: rgba( 250, 250, 250, .6 ) 
-                    url('/media/smap/img/ajax-loader.gif') 
-                    50% 50% 
+        background: rgba( 250, 250, 250, .6 )
+                    url('/media/smap/img/ajax-loader.gif')
+                    50% 50%
                     no-repeat;
       }
     </style>
@@ -65,7 +70,7 @@
           <li><a onclick='getPermalink();' href="#">Permalink</a></li>
           {% if user.is_active %}
             <li><a onclick='logout();' href="#">Log out</a></li>
-          {% else %} 
+          {% else %}
             <li><a onclick='login();' href="#">Log in</a></li>
           {% endif %}
         </ul>
@@ -74,11 +79,11 @@
 
     <div class="tab-content">
       <div class="tab-pane fade in" id="streams" style="margin-top:10px; margin: 10px auto; width:99%;">
-      
+
         <div class="left">
           <div id="vquery"></div>
           <div id='stream-div' style="height: 90%; overflow: auto; margin-top:10px;"></div>
-        </div> 
+        </div>
 
         <div class="right" style="height: 100%;">
           <div id="setup-charts">
@@ -97,7 +102,7 @@
                </span>
              </div>
           </div>
-          
+
           <div id="paths-cont">
             Selected streams <button id='btn-clear' style='margin-bottom: 5px;' class='btn btn-mini'>clear</button>
             <table id ="paths-table" class="table table-hover table-bordered table-condensed">
@@ -114,7 +119,7 @@
             <pre id="single-stream-metadata" class="prettyprint"></pre>
           </div>
           <div id="edit-metadata">
-            Add or edit tags 
+            Add or edit tags
             <div id="metadata-inside">
               <input id="metadata-tag" class="typeahead" type="text"> =
               <input id="metadata-val" type="text">
@@ -132,11 +137,11 @@
           </div>
         </div>
       </div>
-      
+
       <div class="tab-pane fade" id="dashboard"></div>
-    <div class='loading'></div>     
+    <div class='loading'></div>
     </div>
-    
+
 
     <script src="/media/smap/js/tags.js"></script>
     <script>
@@ -160,21 +165,21 @@
           break;
       }
 
-      if (ts_start & ts_end) { 
+      if (ts_start & ts_end) {
         start = new Date(ts_start);
         end = new Date(ts_end);
-      } else { 
+      } else {
         end = new Date();
         start = new Date();
         start.setHours(start.getHours() - 12)
       }
       $('#start-time').datetimepicker();
-      $('#end-time').datetimepicker(); 
+      $('#end-time').datetimepicker();
       $('#start-time').data('datetimepicker').setLocalDate(start);
       $('#end-time').data('datetimepicker').setLocalDate(end);
 
       $("#dropdown-toggle").dropdown()
-      
+
       function renderDashboard(){
         $('#dashboard').empty();
         var start = $('#start-time').data('datetimepicker').getLocalDate();
@@ -186,7 +191,7 @@
         $('.loading').show()
         $('#myTab a[href="#dashboard"]').tab('show');
       }
-      
+
       $('#tdashboard').click(renderDashboard)
 
       $('#btn-clear').click(function(){
@@ -196,17 +201,17 @@
       });
 
       if (uuids) {
-        uuids = uuids.split(',') 
+        uuids = uuids.split(',')
         smaputil.getMetadata(uuids, ['uuid', 'Path'], function(res){
           _.each(res, function(el){
             _streams.push({'path':el.Path, 'uuid':el.uuid})
             $('#paths-table tbody').append('<tr id='+el.uuid+'><td>'+el.Path+'</td><td style="text-align: center"> \
-              <button id="remove-'+el.uuid+'"  class="btn btn-mini btn-remove" type="button">X</button></td></tr>')      
+              <button id="remove-'+el.uuid+'"  class="btn btn-mini btn-remove" type="button">X</button></td></tr>')
             $('#remove-'+el.uuid).click(removeRow);
           });
-          
+
           renderCommonMetadata(uuids);
-      
+
           if(view=='dashboard') {
             renderDashboard();
           }
@@ -232,14 +237,10 @@
         });
         var ts_span = _.sortedIndex(ts_array, ts)
         if (ts_span == 0 | ts_span == readings.length - 1){
-          return Number.NaN
+          return Number.NaN;
         } else {
-          var ts_1 = ts_array[ts_span - 1]
-          var ts_2 = ts_array[ts_span]
           var val_1 = val_array[ts_span - 1]
-          var val_2 = val_array[ts_span]
-          var s = (val_2 - val_1) / (ts_2 - ts_1)
-          return (val_1 + s * (ts - ts_1))
+          return val_1;
         }
       });
     }
@@ -269,7 +270,7 @@
       var xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom");
-      
+
       x.domain(d3.extent(_.flatten(readings), function(d){
         return d.timestamp;
       }));
@@ -278,7 +279,7 @@
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");      
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       svg.append("g")
         .attr("class", "x axis")
@@ -289,7 +290,7 @@
       var precision = [];
       for (var i = 0; i < nseries; i++){
         var y = d3.scale.linear()
-          .range([height - h*i, height - h*(i+1)])
+          .range([height - h*i, height - h*(i+1) + 1])
         var yAxis = d3.svg.axis()
           .scale(y)
           .orient("left");
@@ -297,8 +298,9 @@
           return d.reading
         });
         var range = extent[1] - extent[0]
-        precision.push(Math.max(0, 2 - range.toFixed(0).length))
-        
+
+        precision.push(Math.max(0, 3 - range.toFixed(0).length))
+
         y.domain(extent);
         yAxis.ticks(0);
         var area  = d3.svg.area()
@@ -309,7 +311,7 @@
         var line = d3.svg.line()
           .x(function(d) { return x(d.timestamp); })
           .y(function(d) { return y(d.reading); });
-          
+
         var h_col = 210; //+ Math.floor(i*(180/nseries))
         var col_hsl_series = "hsl(" + h_col.toString() + ", 90%, 70%)"
         var col_hsl_path = "hsl(" + h_col.toString() + ", 90%, 15%)"
@@ -318,7 +320,7 @@
           .attr("class", "line")
           .attr("d", area)
           .attr("fill", col_hsl_series)
-       
+
         svg.append("line")
            .attr("x1", 0)
            .attr("x2", width)
@@ -326,9 +328,9 @@
            .attr("y2", height - h*(i+1))
            .attr("stroke", "grey")
            .attr("opacity", 0.3)
-        
+
         var unit_translate = height - h*(i+1) + h/2
-        var unit_transform = "translate(-45, " + unit_translate.toString() + ") rotate(-90)"   
+        var unit_transform = "translate(-45, " + unit_translate.toString() + ") rotate(-90)"
         svg.append("g")
           .attr("class", "y axis")
           .call(yAxis)
@@ -347,7 +349,7 @@
             .attr("x", -3)
             .attr("y", height - h*(i+1) + 13)
             .style("text-anchor", "end")
-            .text(extent[1].toFixed(precision)) 
+            .text(extent[1].toFixed(precision))
 
           svg.append("text")
             .attr("class", "unit-text")
@@ -355,7 +357,7 @@
             .attr("x", -3)
             .attr("y", height - h*i - 5)
             .style("text-anchor", "end")
-            .text(extent[0].toFixed(precision)) 
+            .text(extent[0].toFixed(precision))
          } catch(err) {
            console.log("Stream with uuid " + uuids[i] + " contains no data in this range")
          }
@@ -378,6 +380,13 @@
           .style("text-anchor", "end")
       }
 
+      svg.append("text")
+        .attr("id", "timestamp")
+        .attr("y", -4)
+        .attr("font-size", 11)
+        .attr("fill", "#666666")
+        .style("text-anchor", "middle")
+
       svg.append("rect")
         .attr("id", "rule")
         .attr("x", 0)
@@ -386,12 +395,17 @@
         .attr("height", height)
         .attr("opacity", 0.7)
 
+      var format = d3.time.format("%a %m-%d %H:%M:%S");
+
       d3.select("svg").on('mousemove', function(){
         var xpos = d3.event.pageX - margin.left - margin.right + 18;
         if (xpos < 0) xpos = 0
         if (xpos > width) xpos = width
         d3.select('#rule').attr('x', xpos);
         var ts = x.invert(xpos).getTime()
+        var date = format(new Date(ts));
+        $('#timestamp').attr('x', xpos);
+        $('#timestamp').text(date);
         var vals = getValsFromTS(ts, readings)
         z = _.zip(vals, precision)
         vals = _.map(z, function(w){
@@ -407,7 +421,7 @@
       });
 
       var tags = ['uuid', 'Path', 'Properties/UnitofMeasure']
-      smaputil.getMetadata(uuids, tags, renderMetadata)      
+      smaputil.getMetadata(uuids, tags, renderMetadata)
     }
 
     $('#myTab a').click(function (e) {
@@ -417,10 +431,10 @@
         $(this).tab('show');
       }
     })
- 
+
     function getPermalink(){
       var permalink = new miuri()
-    
+
       permalink.host(_uri.host())
       permalink.path(_uri.path())
       permalink.protocol(_uri.protocol())
@@ -429,7 +443,6 @@
       var s = $('#start-time').data('datetimepicker').getLocalDate().getTime();
       var e = $('#end-time').data('datetimepicker').getLocalDate().getTime();
       var v = $("#myTab li.active a").attr('id').substr(1)
-      console.log(v)
       permalink.query({
         uuids: uuids.join(','),
         start: s,
@@ -445,7 +458,6 @@
       window.location.href = "../../admin/logout"
     }
     </script>
-    
-    
+
   </body>
 </html>
