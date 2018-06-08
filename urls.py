@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
 
-    (r'^plot/', include('smap.urls')),
+    (r'^plot/', include('smap2.urls')),
 
     (r'^status/', include('status.urls')),
 
@@ -31,7 +31,7 @@ urlpatterns = patterns('',
 
     (r'^robots.txt.*', 'views.robots'),
 
-    (r'^alert/', include('alert.urls')),
+    # (r'^alert/', include('alert.urls')),
 
     (r'^$', 'views.root'),
      

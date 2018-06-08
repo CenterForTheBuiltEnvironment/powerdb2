@@ -6,10 +6,9 @@
 import sys
 
 from urlparse import urljoin, urlparse, urlunparse
-try:
-    from django.http.request import absolute_http_url_re  # Django 1.5+
-except ImportError:
-    from django.http import absolute_http_url_re
+# from django.http import absolute_http_url_re
+import re
+absolute_http_url_re = re.compile("^https?://", re.I)
 
 def absolute_uri(request, base_url):
     if not absolute_http_url_re.match(base_url):

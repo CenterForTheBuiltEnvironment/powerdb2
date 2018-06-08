@@ -2,7 +2,7 @@
 import urllib
 from django.db.models import Q
 import settings
-import smap.models as models
+import smap2.models as models
 import revproxy
 import operator
 

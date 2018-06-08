@@ -24,6 +24,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+ALLOWED_HOSTS = ['toolkit.cbe.berkeley.edu', '104.131.139.227', '127.0.0.1', '107.170.229.142']
+
 DATABASES = {
     'default' : {
         # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
@@ -32,7 +34,7 @@ DATABASES = {
         # Not used with sqlite3.
         'USER' : 'archiver',
         # Not used with sqlite3.
-        'PASSWORD' : 'password',
+        'PASSWORD' : 'G3ccFoUw',
         # Set to empty string for localhost. Not used with sqlite3.
         'HOST' : 'localhost',
         }
@@ -124,8 +126,8 @@ STATICFILES_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'smap',
-    'alert',
+    'smap2',
+    # 'alert',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -134,3 +136,7 @@ INSTALLED_APPS = (
     
     'revproxy',
 )
+
+MIGRATION_MODULES = {
+    'smap2': 'smap2.migrations'
+}
